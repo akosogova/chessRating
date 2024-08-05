@@ -12,8 +12,10 @@ public class Player {
     private String firstName;
     private String lastName;
     private String email;
-    private Role role;
     private ChessData chessData;
+
+    //keycloak user id
+    private String userId;
 
     public String getId() {
         return id;
@@ -47,12 +49,12 @@ public class Player {
         this.email = email;
     }
 
-    public Role getRole() {
-        return role;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public ChessData getChessData() {
@@ -68,11 +70,11 @@ public class Player {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Player player = (Player) o;
-        return Objects.equals(id, player.id) && Objects.equals(firstName, player.firstName) && Objects.equals(lastName, player.lastName) && Objects.equals(email, player.email) && role == player.role && Objects.equals(chessData, player.chessData);
+        return Objects.equals(id, player.id) && Objects.equals(firstName, player.firstName) && Objects.equals(lastName, player.lastName) && Objects.equals(email, player.email) && Objects.equals(chessData, player.chessData) && Objects.equals(userId, player.userId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, email, role, chessData);
+        return Objects.hash(id, firstName, lastName, email, chessData, userId);
     }
 }

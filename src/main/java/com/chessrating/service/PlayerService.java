@@ -7,11 +7,8 @@ import com.chessrating.convertor.PlayerToPlayerRatingResponseConvertor;
 import com.chessrating.exception.PlayerValidationException;
 import com.chessrating.model.ChessData;
 import com.chessrating.model.Player;
-import com.chessrating.model.Role;
 import com.chessrating.repository.PlayerRepository;
 import com.chessrating.validator.ChessDataValidator;
-import com.mongodb.client.result.DeleteResult;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,17 +38,13 @@ public class PlayerService {
     }
 
     public Player createPlayer(Player player) throws PlayerValidationException {
+        // TODO: Add check for the same ids (if player already exists)
         if (Objects.isNull(player.getFirstName())
                 || Objects.isNull(player.getLastName())
                 || player.getFirstName().isEmpty()
                 || player.getLastName().isEmpty()) {
             //TODO Add LOG
             throw new PlayerValidationException("Cannot create player without first/last name");
-        }
-
-        if (Objects.isNull(player.getRole())) {
-            //TODO Add LOG
-            player.setRole(Role.USER);
         }
 
         if (Objects.isNull(player.getChessData())
@@ -74,12 +67,6 @@ public class PlayerService {
         player.setId(id);
         player.setFirstName(playerData.getFirstName());
         player.setLastName(playerData.getLastName());
-        if (Objects.isNull(player.getRole())) {
-            //TODO Add LOG
-            player.setRole(Role.USER);
-        } else {
-            player.setRole(playerData.getRole());
-        }
         player.setEmail(playerData.getEmail());
         return player;
     }

@@ -1,9 +1,6 @@
 package com.chessrating.api.model;
 
-import com.chessrating.model.ChessData;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModelProperty;
 
 import java.util.Objects;
 
