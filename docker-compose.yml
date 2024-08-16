@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  chess-rating-app:
+    image: chess_rating
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - service-db
+    environment:
+      - SERVER_PORT= 8080
+      - SPRING_DATA_MONGODB_URI=mongodb://service-db/ChessRating
+
+  service-db:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+    restart: unless-stopped
