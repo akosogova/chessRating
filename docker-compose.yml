@@ -9,6 +9,7 @@ services:
     environment:
       - SERVER_PORT= 8080
       - SPRING_DATA_MONGODB_URI=mongodb://service-db/ChessRating
+      - SPRING_PROFILES_ACTIVE=dev # Can be set to `dev` or `prod`
 
   service-db:
     image: mongo:latest

@@ -12,4 +12,6 @@ RUN mkdir - p /app
 
 COPY --from=build /home/gradle/src/build/libs/*.jar /app/chessRating.jar
 
-ENTRYPOINT ["java","-jar","-Dspring.profiles.active=prod","/app/chessRating.jar"]
+ENV SPRING_PROFILES_ACTIVE=prod
+
+ENTRYPOINT ["java","-jar","-Dspring.profiles.active=${SPRING_PROFILES_ACTIVE}","/app/chessRating.jar"]
