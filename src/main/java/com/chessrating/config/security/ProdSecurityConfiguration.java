@@ -1,6 +1,6 @@
 package com.chessrating.config.security;
 
-import com.chessrating.api.model.Role;
+import com.chessrating.model.Role;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;
 import org.keycloak.adapters.springsecurity.authentication.KeycloakAuthenticationProvider;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
@@ -35,13 +35,6 @@ public class ProdSecurityConfiguration extends KeycloakWebSecurityConfigurerAdap
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        // TODO: Clear error messages?? Currently we have:
-//        {
-//            "timestamp": "2024-08-13T08:50:37.286+00:00",
-//                "status": 403,
-//                "error": "Forbidden",
-//                "path": "/api/chess-rating/player/2"
-//        }
         super.configure(http);
         http.csrf()
                 .disable()

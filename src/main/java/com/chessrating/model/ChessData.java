@@ -25,4 +25,11 @@ public class ChessData {
     public int hashCode() {
         return Objects.hash(rating);
     }
+
+    @Override
+    public String toString() {
+        return "ChessData{" +
+                "rating=" + rating +
+                '}';
+    }
 }

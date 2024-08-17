@@ -8,14 +8,12 @@ import java.util.Objects;
 @Document(collection = "players")
 public class Player {
     @Id
+    //keycloak user id
     private String id;
     private String firstName;
     private String lastName;
     private String email;
     private ChessData chessData;
-
-    //keycloak user id
-    private String userId;
 
     public String getId() {
         return id;
@@ -49,14 +47,6 @@ public class Player {
         this.email = email;
     }
 
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
     public ChessData getChessData() {
         return chessData;
     }
@@ -70,11 +60,22 @@ public class Player {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Player player = (Player) o;
-        return Objects.equals(id, player.id) && Objects.equals(firstName, player.firstName) && Objects.equals(lastName, player.lastName) && Objects.equals(email, player.email) && Objects.equals(chessData, player.chessData) && Objects.equals(userId, player.userId);
+        return Objects.equals(id, player.id) && Objects.equals(firstName, player.firstName) && Objects.equals(lastName, player.lastName) && Objects.equals(email, player.email) && Objects.equals(chessData, player.chessData);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, email, chessData, userId);
+        return Objects.hash(id, firstName, lastName, email, chessData);
+    }
+
+    @Override
+    public String toString() {
+        return "Player{" +
+                "id='" + id + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", email='" + email + '\'' +
+                ", chessData=" + chessData + '\'' +
+                '}';
     }
 }

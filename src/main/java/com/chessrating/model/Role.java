@@ -1,4 +1,4 @@
-package com.chessrating.api.model;
+package com.chessrating.model;
 
 public enum Role {
     MANAGER,

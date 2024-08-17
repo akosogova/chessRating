@@ -9,6 +9,9 @@ import com.chessrating.model.ChessData;
 import com.chessrating.model.Player;
 import com.chessrating.repository.PlayerRepository;
 import com.chessrating.validator.ChessDataValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,63 +21,51 @@ import java.util.stream.Collectors;
 
 @Service
 public class PlayerService {
-    private final PlayerRepository playerRepository;
+    private static final Logger LOG = LoggerFactory.getLogger(PlayerService.class);
+    @Autowired
+    PlayerRepository playerRepository;
+    @Autowired
+    ChessDataValidator chessDataValidator;
 
-    private final ChessDataValidator chessDataValidator;
-
-    public PlayerService(PlayerRepository playerRepository, ChessDataValidator chessDataValidator) {
-        this.playerRepository = playerRepository;
-        this.chessDataValidator = chessDataValidator;
-    }
-
-    public List<Player> getAllPlayers() {
-        return playerRepository.findAll();
-    }
-
-    public List<PlayerRatingResponse> getAllPlayerRating() {
+    public List<PlayerRatingResponse> getAllPlayersRating() {
         return playerRepository.findAll().stream()
                 .map(PlayerToPlayerRatingResponseConvertor::convertPlayerToPlayerRatingResponse)
                 .collect(Collectors.toList());
     }
 
-    public Player createPlayer(Player player) throws PlayerValidationException {
-        // TODO: Add check for the same ids (if player already exists)
-        if (Objects.isNull(player.getFirstName())
-                || Objects.isNull(player.getLastName())
-                || player.getFirstName().isEmpty()
-                || player.getLastName().isEmpty()) {
-            //TODO Add LOG
-            throw new PlayerValidationException("Cannot create player without first/last name");
+    public void createPlayer(Player player) throws PlayerValidationException {
+        if (Objects.isNull(player)) {
+            LOG.error("[PlayerService::createPlayer] Cannot create empty player");
+            throw new PlayerValidationException("Cannot create empty player");
+        }
+
+        if (Objects.isNull(player.getId()) || player.getId().isEmpty()) {
+            LOG.error("[PlayerService::createPlayer] Please set player id");
+            throw new PlayerValidationException("Please set player id");
+        }
+
+        if (playerRepository.findById(player.getId()).isPresent()) {
+            LOG.error("[PlayerService::createPlayer] A player with the given id {} already exists", player.getId());
+            throw new PlayerValidationException("A player with the given id " + player.getId() + " already exists, please provide a different id");
         }
 
         if (Objects.isNull(player.getChessData())
                 || player.getChessData().getRating() == 0) {
-            //TODO Add LOG
+            LOG.warn("[PlayerService::createPlayer] The initial rating has not been set and will be set to {}", GlobalConfig.INITIAL_RATING);
             ChessData chessData = new ChessData();
             chessData.setRating(GlobalConfig.INITIAL_RATING);
             player.setChessData(chessData);
         }
-        return playerRepository.save(player);
-    }
 
-    public Player updatePlayer(String id, Player playerData) throws PlayerValidationException {
-        if (Objects.isNull(id)) {
-            //TODO Add LOG
-            throw new PlayerValidationException("Player id cannot be null");
-        }
-        Player player = playerRepository.findById(id).orElse(new Player());
-
-        player.setId(id);
-        player.setFirstName(playerData.getFirstName());
-        player.setLastName(playerData.getLastName());
-        player.setEmail(playerData.getEmail());
-        return player;
+        chessDataValidator.validate(player.getChessData());
+        playerRepository.save(player);
+        LOG.info("[PlayerService::createPlayer] Player {} has been added", player);
     }
 
     public Player getPlayerById(String id) throws PlayerValidationException {
         Optional<Player> player = playerRepository.findById(id);
         if (!player.isPresent()) {
-            //todo Add LOG
+            LOG.error("[PlayerService::getPlayerById] Cannot find player with id {}", id);
             throw new PlayerValidationException("Cannot find player with id " + id);
         }
         return player.get();
@@ -82,7 +73,9 @@ public class PlayerService {
 
     public void updateRating(String id, RatingUpdateRequest ratingUpdateRequest) throws PlayerValidationException {
         Player player = getPlayerById(id);
+
         if (Objects.isNull(ratingUpdateRequest)) {
+            LOG.error("[PlayerService::getPlayerById] Cannot find player with id {}", id);
             throw new PlayerValidationException("Please provide a rating value to update");
         }
 
@@ -92,10 +85,13 @@ public class PlayerService {
         player.getChessData().setRating(ratingUpdateRequest.getRating());
         chessDataValidator.validate(player.getChessData());
         playerRepository.save(player);
+        LOG.info("[PlayerService::createPlayer] The rating of the player with id {} has been changed to {}",
+                player.getId(), ratingUpdateRequest.getRating());
     }
 
     public void deletePlayer(String id) throws PlayerValidationException {
         Player player = getPlayerById(id);
         playerRepository.delete(player);
+        LOG.info("[PlayerService::deletePlayer] Player {} has been deleted", player);
     }
 }
