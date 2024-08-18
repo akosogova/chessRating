@@ -43,12 +43,11 @@ java -jar -Dspring.profiles.active=<mode> build/chessRating.jar
 ### Run via docker-compose
 **Prerequisites**
 - docker
-- docker-compose
 
 1. Set SPRING_PROFILES_ACTIVE env variable in docker-compose.yml to `dev` or `prod`
 2. Run:
 ```bash
-docker-compose up
+docker compose up
 ```
 
 ## REST API

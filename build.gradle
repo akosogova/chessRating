@@ -88,10 +88,8 @@ jar {
 
 build {
 	dependsOn 'copyLibs'
-	dependsOn 'compileJava'
 	dependsOn 'copyToBuild'
 	dependsOn 'jar'
-	tasks.findByName('compileJava').dependsOn 'copyLibs'
-	tasks.findByName('copyToBuild').dependsOn 'compileJava'
+	tasks.findByName('copyToBuild').dependsOn 'copyLibs'
 	tasks.findByName('jar').dependsOn 'copyToBuild'
 }
