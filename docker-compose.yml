@@ -1,12 +1,13 @@
+version: "2.2"
 services:
   chess-rating-app:
     image: ghcr.io/akosogova/chessrating:latest
     ports:
-      - "8080:8080"
+      - "8090:8090"
     depends_on:
       - service-db
     environment:
-      - SERVER_PORT= 8080
+      - SERVER_PORT= 8090
       - SPRING_DATA_MONGODB_URI=mongodb://service-db/ChessRating
       - SPRING_PROFILES_ACTIVE=prod # Can be set to `dev` or `prod`
 
