@@ -9,16 +9,6 @@ import org.springframework.context.annotation.Bean;
 
 public class AppTestConfiguration {
     @Bean
-    public PlayerRepository playerRepository() {
-        return Mockito.mock(PlayerRepository.class);
-    }
-
-    @Bean
-    PlayerService playerService() {
-        return new PlayerService();
-    }
-
-    @Bean
     ChessDataValidator chessDataValidator() {
         return new RatingValidatorImpl();
     }

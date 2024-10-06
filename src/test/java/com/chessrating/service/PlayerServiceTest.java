@@ -4,15 +4,18 @@ import com.chessrating.AppTestConfiguration;
 import com.chessrating.api.model.RatingUpdateRequest;
 import com.chessrating.builder.PlayerBuilder;
 import com.chessrating.config.GlobalConfig;
+import com.chessrating.convertor.PlayerConvertor;
 import com.chessrating.exception.PlayerValidationException;
+import com.chessrating.model.ChessData;
 import com.chessrating.model.Player;
 import com.chessrating.repository.PlayerRepository;
 import com.chessrating.validator.ChessDataValidator;
+import com.chessrating.validator.impl.RatingValidatorImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -22,19 +25,19 @@ import static com.chessrating.config.GlobalConfig.MAX_RATING;
 import static com.mongodb.assertions.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(SpringExtension.class)
+@SpringBootTest
 @ContextConfiguration(classes = {AppTestConfiguration.class})
 public class PlayerServiceTest {
-    @Autowired
-    PlayerRepository playerRepository;
-    @Autowired
-    ChessDataValidator chessDataValidator;
-    @Autowired
-    PlayerService playerService;
+    private final PlayerRepository playerRepository = Mockito.mock(PlayerRepository.class);
+    private final ChessDataValidator chessDataValidator = new RatingValidatorImpl();
+    private final PlayerService playerService = new PlayerService(playerRepository, chessDataValidator);
 
     @BeforeEach
-    private void resetMocks() {
+    public void resetMocks() {
         Mockito.reset(playerRepository);
     }
 
@@ -91,7 +94,7 @@ public class PlayerServiceTest {
         Player player = new PlayerBuilder()
                 .withDefaultValues()
                 .build();
-        Mockito.when(playerRepository.findById(player.getId())).thenReturn(Optional.of(player));
+        Mockito.when(playerRepository.findById(player.getId())).thenReturn(Optional.of(PlayerConvertor.convertPlayer(player)));
         Throwable exception = assertThrows(PlayerValidationException.class, () ->
                 playerService.createPlayer(player));
         String expectedMessage = "A player with the given id 1111 already exists, please provide a different id";
@@ -116,7 +119,7 @@ public class PlayerServiceTest {
         Player player = new PlayerBuilder()
                 .withDefaultValues()
                 .build();
-        Mockito.when(playerRepository.findById(player.getId())).thenReturn(Optional.of(player));
+        Mockito.when(playerRepository.findById(player.getId())).thenReturn(Optional.of(PlayerConvertor.convertPlayer(player)));
         Player actualPlayer = playerService.getPlayerById("1111");
 
         assertTrue(player.equals(actualPlayer));
@@ -138,12 +141,15 @@ public class PlayerServiceTest {
         Player player = new PlayerBuilder()
                 .withDefaultValues()
                 .build();
-        Mockito.when(playerRepository.findById(player.getId())).thenReturn(Optional.of(player));
+        Mockito.when(playerRepository.findById(player.getId()))
+                .thenReturn(Optional.of(PlayerConvertor.convertPlayer(player)))
+                .thenReturn(Optional.of(PlayerConvertor.convertPlayer(player)));
         RatingUpdateRequest ratingUpdateRequest = new RatingUpdateRequest();
         ratingUpdateRequest.setRating(2000);
 
         playerService.updateRating("1111", ratingUpdateRequest);
-        assertEquals(2000, player.getChessData().getRating());
+        player.getChessData().setRating(2000);
+        verify(playerRepository, times(1)).save(PlayerConvertor.convertPlayer(player));
     }
 
     @Test
@@ -151,7 +157,7 @@ public class PlayerServiceTest {
         Player player = new PlayerBuilder()
                 .withDefaultValues()
                 .build();
-        Mockito.when(playerRepository.findById(player.getId())).thenReturn(Optional.of(player));
+        Mockito.when(playerRepository.findById(player.getId())).thenReturn(Optional.of(PlayerConvertor.convertPlayer(player)));
         Throwable exception = assertThrows(PlayerValidationException.class, () ->
                 playerService.updateRating("1111", null));
         String expectedMessage = "Please provide a rating value to update";
@@ -175,12 +181,14 @@ public class PlayerServiceTest {
         Player player = new PlayerBuilder()
                 .setId("1111")
                 .build();
-        Mockito.when(playerRepository.findById(player.getId())).thenReturn(Optional.of(player));
+        Mockito.when(playerRepository.findById(player.getId())).thenReturn(Optional.of(PlayerConvertor.convertPlayer(player)));
         RatingUpdateRequest ratingUpdateRequest = new RatingUpdateRequest();
         ratingUpdateRequest.setRating(2000);
         playerService.updateRating("1111", ratingUpdateRequest);
 
-        assertEquals(2000, player.getChessData().getRating());
+        player.setChessData(ChessData.builder().rating(2000).build());
+        verify(playerRepository, times(1)).save(PlayerConvertor.convertPlayer(player));
+
     }
 
     @Test
@@ -188,7 +196,7 @@ public class PlayerServiceTest {
         Player player = new PlayerBuilder()
                 .withDefaultValues()
                 .build();
-        Mockito.when(playerRepository.findById(player.getId())).thenReturn(Optional.of(player));
+        Mockito.when(playerRepository.findById(player.getId())).thenReturn(Optional.of(PlayerConvertor.convertPlayer(player)));
         RatingUpdateRequest ratingUpdateRequest = new RatingUpdateRequest();
         ratingUpdateRequest.setRating(10000);
 

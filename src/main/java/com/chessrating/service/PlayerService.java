@@ -3,15 +3,17 @@ package com.chessrating.service;
 import com.chessrating.api.model.PlayerRatingResponse;
 import com.chessrating.api.model.RatingUpdateRequest;
 import com.chessrating.config.GlobalConfig;
+import com.chessrating.convertor.PlayerConvertor;
 import com.chessrating.convertor.PlayerToPlayerRatingResponseConvertor;
 import com.chessrating.exception.PlayerValidationException;
 import com.chessrating.model.ChessData;
 import com.chessrating.model.Player;
 import com.chessrating.repository.PlayerRepository;
+import com.chessrating.repository.entity.PlayerEntity;
 import com.chessrating.validator.ChessDataValidator;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,12 +22,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class PlayerService {
     private static final Logger LOG = LoggerFactory.getLogger(PlayerService.class);
-    @Autowired
-    PlayerRepository playerRepository;
-    @Autowired
-    ChessDataValidator chessDataValidator;
+    private final PlayerRepository playerRepository;
+    private final ChessDataValidator chessDataValidator;
 
     public List<PlayerRatingResponse> getAllPlayersRating() {
         return playerRepository.findAll().stream()
@@ -52,23 +53,21 @@ public class PlayerService {
         if (Objects.isNull(player.getChessData())
                 || player.getChessData().getRating() == 0) {
             LOG.warn("[PlayerService::createPlayer] The initial rating has not been set and will be set to {}", GlobalConfig.INITIAL_RATING);
-            ChessData chessData = new ChessData();
-            chessData.setRating(GlobalConfig.INITIAL_RATING);
-            player.setChessData(chessData);
+            player.setChessData(ChessData.builder().rating(GlobalConfig.INITIAL_RATING).build());
         }
 
         chessDataValidator.validate(player.getChessData());
-        playerRepository.save(player);
+        playerRepository.save(PlayerConvertor.convertPlayer(player));
         LOG.info("[PlayerService::createPlayer] Player {} has been added", player);
     }
 
     public Player getPlayerById(String id) throws PlayerValidationException {
-        Optional<Player> player = playerRepository.findById(id);
+        Optional<PlayerEntity> player = playerRepository.findById(id);
         if (!player.isPresent()) {
             LOG.error("[PlayerService::getPlayerById] Cannot find player with id {}", id);
             throw new PlayerValidationException("Cannot find player with id " + id);
         }
-        return player.get();
+        return PlayerConvertor.convertPlayer(player.get());
     }
 
     public void updateRating(String id, RatingUpdateRequest ratingUpdateRequest) throws PlayerValidationException {
@@ -80,18 +79,20 @@ public class PlayerService {
         }
 
         if (Objects.isNull(player.getChessData())) {
-            player.setChessData(new ChessData());
+            player.setChessData(ChessData.builder()
+                    .rating(GlobalConfig.INITIAL_RATING)
+                    .build());
         }
         player.getChessData().setRating(ratingUpdateRequest.getRating());
         chessDataValidator.validate(player.getChessData());
-        playerRepository.save(player);
+        playerRepository.save(PlayerConvertor.convertPlayer(player));
         LOG.info("[PlayerService::createPlayer] The rating of the player with id {} has been changed to {}",
                 player.getId(), ratingUpdateRequest.getRating());
     }
 
     public void deletePlayer(String id) throws PlayerValidationException {
         Player player = getPlayerById(id);
-        playerRepository.delete(player);
+        playerRepository.delete(PlayerConvertor.convertPlayer(player));
         LOG.info("[PlayerService::deletePlayer] Player {} has been deleted", player);
     }
 }

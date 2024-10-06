@@ -21,14 +21,14 @@ public class RatingValidatorTest {
     ChessDataValidator chessDataValidator;
     @Test
     public void validateRatingTest() {
-        ChessData chessData = new ChessData();
+        ChessData chessData = ChessData.builder().build();
         chessData.setRating(4999);
         assertDoesNotThrow(() -> chessDataValidator.validate(chessData));
     }
 
     @Test
     public void validateRating0Test() {
-        ChessData chessData = new ChessData();
+        ChessData chessData = ChessData.builder().build();
         chessData.setRating(0);
         Throwable exception = assertThrows(PlayerValidationException.class, () ->
                 chessDataValidator.validate(chessData));
@@ -40,7 +40,7 @@ public class RatingValidatorTest {
 
     @Test
     public void validateRating5000Test() {
-        ChessData chessData = new ChessData();
+        ChessData chessData = ChessData.builder().build();
         chessData.setRating(5000);
         Throwable exception = assertThrows(PlayerValidationException.class, () ->
                 chessDataValidator.validate(chessData));

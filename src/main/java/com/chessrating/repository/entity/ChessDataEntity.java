@@ -1,4 +1,4 @@
-package com.chessrating.model;
+package com.chessrating.repository.entity;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -11,14 +11,14 @@ import java.util.Objects;
 @Setter
 @Builder
 @ToString
-public class ChessData {
+public class ChessDataEntity {
     private int rating;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ChessData chessData = (ChessData) o;
+        ChessDataEntity chessData = (ChessDataEntity) o;
         return rating == chessData.rating;
     }
 

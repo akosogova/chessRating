@@ -40,7 +40,7 @@ public class PlayerBuilder {
 
     public PlayerBuilder setRating(int rating) {
         if (Objects.isNull(chessData)) {
-            chessData = new ChessData();
+            chessData = ChessData.builder().rating(0).build();
         }
         chessData.setRating(rating);
         return this;
@@ -51,14 +51,14 @@ public class PlayerBuilder {
         this.firstName = "First";
         this.lastName = "Last";
         this.email = "first.last@mail.com";
-        ChessData chessData = new ChessData();
+        ChessData chessData = ChessData.builder().build();
         chessData.setRating(1500);
         this.chessData = chessData;
         return this;
     }
 
     public Player build() {
-        Player player = new Player();
+        Player player = Player.builder().build();
         player.setId(id);
         player.setFirstName(firstName);
         player.setLastName(lastName);

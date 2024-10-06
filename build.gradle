@@ -5,10 +5,6 @@ plugins {
 }
 
 group = 'com.chessrating'
-archivesBaseName = 'chessRating'
-def libFolder = new File("${projectDir}/lib")
-def buildFolder = new File("${projectDir}/build")
-def buildLibFolder = new File("${buildFolder}/lib")
 
 java {
 	toolchain {
@@ -21,75 +17,18 @@ repositories {
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 
-	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation group: 'org.keycloak', name: 'keycloak-spring-boot-starter', version: '21.0.0'
+	compileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.34'
+	annotationProcessor 'org.projectlombok:lombok'
+
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.junit.jupiter:junit-jupiter-api'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
-}
-
-tasks.named('test') {
-	useJUnitPlatform()
-}
-
-task copyLibs {
-	configurations.implementation.setCanBeResolved(true)
-	configurations.testImplementation.setCanBeResolved(true)
-	doLast {
-		if (!libFolder.exists()) {
-			libFolder.mkdirs()
-		}
-		copy {
-			from configurations.implementation, configurations.testImplementation
-			into 'lib'
-		}
-	}
-}
-
-task copyToBuild {
-	doLast {
-		if (!buildFolder.exists()) {
-			buildFolder.mkdirs()
-		}
-
-		if (!buildLibFolder.exists()) {
-			buildLibFolder.mkdirs()
-		}
-
-		copy {
-			from libFolder
-			include '*.jar'
-			into buildLibFolder
-		}
-	}
-}
-
-jar {
-	destinationDirectory.set(file(buildFolder))
-	archiveFileName.set("${archivesBaseName}.jar")
-
-	manifest {
-		attributes(
-				'Gradle-Version': gradle.gradleVersion,
-				'Created-By': "${System.properties['java.runtime.version']} (${System.properties['java.vendor']})",
-				'Class-Path': configurations.runtimeClasspath.files.collect { "lib/${it.getName()}" }.join(' '),
-				'Main-Class': 'com.chessrating.ChessRatingApplication'
-		)
-	}
-}
-
-build {
-	dependsOn 'copyLibs'
-	dependsOn 'copyToBuild'
-	dependsOn 'jar'
-	tasks.findByName('copyToBuild').dependsOn 'copyLibs'
-	tasks.findByName('jar').dependsOn 'copyToBuild'
 }

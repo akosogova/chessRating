@@ -5,11 +5,13 @@ import com.chessrating.model.ChessData;
 import com.chessrating.validator.ChessDataValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
 import static com.chessrating.config.GlobalConfig.MAX_RATING;
 
+@Component
 public class RatingValidatorImpl implements ChessDataValidator {
     private static final Logger LOG = LoggerFactory.getLogger(RatingValidatorImpl.class);
     @Override
